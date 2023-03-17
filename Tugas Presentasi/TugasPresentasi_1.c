@@ -2,34 +2,21 @@
 #include <stdlib.h>
 
 void swap(int *a, int *b);
+int checkSorting(int arr[], int n);
+void show(int arr[], size_t length);
 
 int main(){
     int i, j, diff;
     int output = 1;
-    int arr[] = {1, 0, 3, 2};
+    int arr[] = {2, 1, 4, 3, 5};
     int length = sizeof(arr) / sizeof(arr[0]);
-    printf("Your array is \n");
-    for(int i = 0; i < length; i++){
-        printf("%d ", arr[i]);
-    }
-    puts("");
+    show(arr, length);
 
-    for(i = 0; i < length - 1; i++){
-        for(j = 0; j < length - i - 1; j++){
-            if(arr[j+1] < arr[j]){
-                diff = abs(arr[j+1] - arr[j]);
-                if(diff != 1){
-                    output = 0;
-                }
-                swap(&arr[j], &arr[j+1]);
-            }
-        }
-    }
+    output = checkSorting(arr, length);
 
     printf("Output: ");
-    (output == 1)? printf("yes"):printf("no");
+    (output == 1)? printf("yes \n"):printf("no \n");
     if(output == 1){
-        puts("");
         printf("Your sorted array is \n");
         for(int i = 0; i < length; i++){
             printf("%d ", arr[i]);
@@ -44,4 +31,28 @@ void swap(int *a, int *b){
     int temp = *a;
     *a = *b;
     *b = temp;
+}
+
+int checkSorting(int arr[], int n){
+    for (int i=0; i<n-1; i++)
+    {
+        if ((arr[i] - arr[i+1]) == 1){
+            show(arr, n);
+        }
+        else{
+            return 0;
+        }
+        if (arr[i] > arr[i+1]){
+            swap(&arr[i], &arr[i+1]);
+        }
+    }
+    return 1;
+}
+
+void show(int arr[], size_t length){
+    printf("Your array is \n");
+    for(int i = 0; i < length; i++){
+        printf("%d ", arr[i]);
+    }
+    puts("");
 }
