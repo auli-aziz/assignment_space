@@ -1,2 +1,5 @@
-);
-    else printf("Elemen berada pada indeks ke-%d dengan linear search\n", linearResult);
+
+    // for(i = 0; i < SIZE; i++){
+    //     printf("Index ke-%d: ", i+1);
+    //     scanf("%d", &array[i]);
+    // }
