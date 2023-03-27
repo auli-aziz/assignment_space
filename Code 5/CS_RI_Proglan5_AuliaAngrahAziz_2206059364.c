@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>  
 
 /*
 1. input: jumlah mahsw, nama tiap mhsw ke dalam daftar_pembeli.txt CHECK
@@ -67,7 +67,6 @@ int main() {
         printf("\nMENCARI INISIAL: \n");
         search(Data, count);
     } else{
-        printf("Menu unavailable\n");
         exit(0);
     }
 
@@ -109,14 +108,16 @@ void input(Name Data[], int n, FILE *fptr){
     for(j = 0; j < n; j++){
         fprintf(fptr, "%s \n", Data[j].name);
     }       
+    fclose(fptr);
 }
 
 void sort(Name Data[], int n, int status, FILE *fptr){
     fptr = fopen("daftar_pembeli_sorted.txt", "w");
     for(int i = 0; i < n; i++){
         fprintf(fptr, "%s", Data[i].name);
-        if(status == 0) fprintf(fptr, "\n");
+        // if(status == 0) fprintf(fptr, "\n");
     }
+    fclose(fptr);
 }
 
 int lineCount(FILE *fptr){
@@ -137,6 +138,7 @@ void input_from_file(Name Data[], int n, FILE *fptr){
         fgets(Data[i].name, 100, fptr);
     }
     fclose(fptr);
+    show(Data, n);
 }
 
 void search(Name Data[], int jumlahData){
@@ -158,7 +160,7 @@ void search(Name Data[], int jumlahData){
         }
     }
     
-    // printf("panjang inisial: %d\n", strlen(Data[0].initial));
+    printf("panjang inisial: %d\n", strlen(Data[0].initial));
     for(int i = 0; i < jumlahData; i++){
         // printf("Jumlah huruf besar yang sesuai pada baris ke-%d: %d\n", i+1, count[i]);
         // printf("Jumlah kapital pada baris ke-%d: %d\n", i+1, kapital[i]);
@@ -176,8 +178,8 @@ void search(Name Data[], int jumlahData){
 }
 
 void show(Name Data[], int jumlahData){
-    printf("Data yang sudah terinput dari file ke dalam struct: \n");
+    printf("Data yang sudah terinput dari file ke dalam struct: ");
     for(int i = 0; i < jumlahData; i++){
-        printf("Data ke-%d: %s \n", i+1, Data[i].name);
+        printf("Data ke-%d: %s ", i+1, Data[i].name);
     }
 }
