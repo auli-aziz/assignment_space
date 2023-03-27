@@ -21,13 +21,12 @@ void input_from_file(Name Data[], int n, FILE *fptr);
 void sort(Name Data[], int n, int status, FILE *fptr); //status untuk membuat baris baru
 int lineCount(FILE *fptr); //menghitung jml baris dalam file .txt
 void search(Name Data[], int jumlahData);
-void show(Name Data[], int jumlahData);
+// void show(Name Data[], int jumlahData);
 
 int main() {
     FILE *fptr;
     Name Data[100]; 
     int menu, count = 0;
-    char chr;
 
     // Read input names from 
     fptr = fopen("daftar_pembeli.txt", "r");
@@ -42,9 +41,9 @@ int main() {
     }else{
         printf("File tersedia! \n");
         count = lineCount(fptr);
+        input_from_file(Data, count, fptr);
         sortName(Data, count);
         sort(Data, count, 1, fptr);
-        input_from_file(Data, count, fptr);
     }
     // Sort names and create initials
     printf("Sorting Selesai! \n");
@@ -115,7 +114,7 @@ void sort(Name Data[], int n, int status, FILE *fptr){
     fptr = fopen("daftar_pembeli_sorted.txt", "w");
     for(int i = 0; i < n; i++){
         fprintf(fptr, "%s", Data[i].name);
-        // if(status == 0) fprintf(fptr, "\n");
+        if(status == 0) fprintf(fptr, "\n");
     }
     fclose(fptr);
 }
@@ -138,7 +137,7 @@ void input_from_file(Name Data[], int n, FILE *fptr){
         fgets(Data[i].name, 100, fptr);
     }
     fclose(fptr);
-    show(Data, n);
+    // show(Data, n);
 }
 
 void search(Name Data[], int jumlahData){
@@ -177,9 +176,9 @@ void search(Name Data[], int jumlahData){
     } else printf("Inisial tidak ditemukan \n");
 }
 
-void show(Name Data[], int jumlahData){
-    printf("Data yang sudah terinput dari file ke dalam struct: ");
-    for(int i = 0; i < jumlahData; i++){
-        printf("Data ke-%d: %s ", i+1, Data[i].name);
-    }
-}
+// void show(Name Data[], int jumlahData){
+//     printf("Data yang sudah terinput dari file ke dalam struct: ");
+//     for(int i = 0; i < jumlahData; i++){
+//         printf("Data ke-%d: %s ", i+1, Data[i].name);
+//     }
+// }
