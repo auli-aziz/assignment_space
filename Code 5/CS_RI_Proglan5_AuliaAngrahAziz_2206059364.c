@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define SIZE 100    
 
 /*
 1. input: jumlah mahsw, nama tiap mhsw ke dalam daftar_pembeli.txt CHECK
@@ -159,7 +158,7 @@ void search(Name Data[], int jumlahData){
         }
     }
     
-    printf("panjang inisial: %d\n", strlen(Data[0].initial));
+    // printf("panjang inisial: %d\n", strlen(Data[0].initial));
     for(int i = 0; i < jumlahData; i++){
         // printf("Jumlah huruf besar yang sesuai pada baris ke-%d: %d\n", i+1, count[i]);
         // printf("Jumlah kapital pada baris ke-%d: %d\n", i+1, kapital[i]);
