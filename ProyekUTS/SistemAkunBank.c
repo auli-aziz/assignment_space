@@ -8,7 +8,7 @@ TUGAS PROYEK KELOMPOK TENGAH SEMESTER
 JUDUL: SISTEM AKUN BANK
 LINK VIDEO: 
 *********************************************
-Anggota: 
+ANGGOTA: 
 * Muhammad Abrisam Cahyo Juhartono || 2206026050
 * Aulia Anugrah Aziz || 2206059364
 * Naufal Rusyda Santosa || 2206813353
@@ -31,13 +31,13 @@ typedef struct Akun {
     char namaIbu[50];
     char alamat[100];
     char password[100];
-    int tanggal, bulan, tahun;
+    int tanggal, bulan, tahun, saldo;
 } Akun;
 
-typedef struct Pass {
+typedef struct Pin {
     int passAdmin;
     char password[100];
-} Pass;
+} Pin;
 
 typedef struct Transfer {
     char tujuan[100];
@@ -49,7 +49,7 @@ void bikinAkun();
 
 int main(){
     int menu, opsiUser = 0;
-    Pass data;
+    Pin data;
 
     printf("SELAMAT DATANG DI BANK JAGO\n");
     // sleep(1);
@@ -81,6 +81,8 @@ int main(){
             printf("PASSWORD SALAH! \n");
             exit(0);
         }
+    } else{
+        printf("MENU TIDAK TERSEDIA \n");
     }
         
     return 0;
