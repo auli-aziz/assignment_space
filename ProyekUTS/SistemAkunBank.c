@@ -35,7 +35,6 @@ typedef struct Akun {
     char username[50];
     char namaIbu[50];
     char alamat[100];
-    char password[100];
     int tanggal, bulan, tahun, saldo;
 } Akun;
 
@@ -50,24 +49,24 @@ typedef struct Transfer {
     long int uang;
 } Transfer;
 
-void admin(int menu);
-void nasabah(int menu, struct Akun data);
+void admin();
+void nasabah();
 void bikinAkun();
 void login();
+int lineCount();
 void transfer();
 
 int main(){
-    int menu, opsiUser = 0;
-    Pin data;
+    int opsiUser;
 
     printf("SELAMAT DATANG DI BANK JAGO\n");
-    // sleep(1);
+    sleep(1);
     printf("MASUK SEBAGAI\n1. NASABAH\n2. ADMIN\nPILIHAN: ");
     scanf("%d", &opsiUser);
     if(opsiUser == 1){
-        nasabah(menu);
+        nasabah();
     } else if(opsiUser == 2){
-        admin(menu, data);
+        admin();
     } else{
         printf("MENU TIDAK TERSEDIA \n");
     }
@@ -75,7 +74,8 @@ int main(){
     return 0;
 }
 
-void nasabah(int menu){
+void nasabah(){
+    int menu;
     system("CLS");
     printf("SILAKAN PILIH JENIS MENU YANG TERSEDIA\n");
     printf("1. MEMBUAT AKUN BARU\n2. SUDAH MEMPUNYAI AKUN\nPILIHAN: ");
@@ -92,9 +92,21 @@ void nasabah(int menu){
     }
 }
 
-void nasabah(int menu, struct Pin data){
+void admin(){
+    FILE *fptr;
+    Pin data;
+    int menu;
+    
     system("CLS");
-    printf("ANDA MASUK SEBAGAI ADMIN\nSILAKAN MASUKKAN PIN ADMIN: ");
+    printf("ANDA MASUK SEBAGAI ADMIN\n");
+    printf("==================================\n");
+    fptr = fopen("database.txt", "r");
+    if(fptr == NULL){
+        printf("FILE DATABASE TIDAK DITEMUKAN\n");
+    } else{
+        int count = lineCount();
+    }
+    printf("SILAKAN MASUKKAN PIN ADMIN: ");
     scanf("%d", &data.passAdmin);
     if(data.passAdmin == 000){
         printf("1. SORT\n2. SEARCH REKENING\nPILIHAN: ");
@@ -107,11 +119,15 @@ void nasabah(int menu, struct Pin data){
 void bikinAkun(){
     FILE *fptr;
     Akun data;
+    Pin datum;
+    int i;
+    char ch;
+
     system("CLS");
     printf("MENU PEMBUATAN AKUN BARU BANK JAGO\n");
-    // sleep(1);
+    printf("==================================\n");
+    sleep(1);
     printf("NAMA DEPAN: ");
-    getchar();
     fgets(data.namaDepan, sizeof(data.namaDepan), stdin);
     data.namaDepan[strcspn(data.namaDepan, "\n")] = '\0'; //removes new line
     printf("NAMA BELAKANG: ");
@@ -120,21 +136,48 @@ void bikinAkun(){
     fgets(data.namaIbu, sizeof(data.namaIbu), stdin);
     printf("ALAMAT DOMISILI: ");
     fgets(data.alamat, sizeof(data.alamat), stdin);
-    printf("MASUKKAN TANGGAL LAHIR: ");
-    scnaf("%d", &data.tanggal);
+    printf("MASUKKAN TANGGAL LAHIR (HH/MM/YYYY): ");
+    scanf("%d", &data.tanggal);
     getchar();
-    scnaf("%d", &data.bulan);
+    scanf("%d", &data.bulan);
     getchar();
-    scnaf("%d", &data.tahun);
-
+    scanf("%d", &data.tahun);
     printf("USERNAME (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
+    getchar();
     fgets(data.username, sizeof(data.username), stdin);
-
+    printf("MASUKKAN PASSWORD (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
+    for (i = 0; i < 50; i++) {
+        ch = getch();
+        if (ch == 13) {
+            break;
+        } else if(ch != 8){
+            datum.password[i] = ch;
+            ch = '*';
+            printf("%c", ch);
+        }
+    }
 
     fptr = fopen("database.txt", "a");
-    fprintf(fptr, "==================== \n");
-    fprintf(fptr, "NAMA LENGKAP: %s %s", data.namaDepan, data.namaBelakang);
-    fprintf(fptr, "NAMA IBU KANDUNG: %s", data.namaIbu);
-    fprintf(fptr, "ALAMAT: %s", data.alamat);
+    fprintf(fptr, "%s %s", data.namaDepan, data.namaBelakang);
+    fprintf(fptr, "%s", data.namaIbu);
+    fprintf(fptr, "%s", data.alamat);
+    fprintf(fptr, "%d/%d/%d \n", data.tanggal, data.bulan, data.tahun);
+    fprintf(fptr, "%s", data.username);
+    fprintf(fptr, "%s \n", datum.password);
+    fprintf(fptr, "========================\n");
     fclose(fptr);
+}
+
+int lineCount(){
+    FILE *fptr;
+    char c;
+    int count = 1; 
+
+    fptr = fopen("database.txt", "r");
+    for (c = getc(fptr); c != EOF; c = getc(fptr)){
+        if(c == '\n') count++;
+    }
+    fclose(fptr);
+    printf("JUMLAH TOTAL NASABAH: %d \n", count / 7);
+    return count;
 }
