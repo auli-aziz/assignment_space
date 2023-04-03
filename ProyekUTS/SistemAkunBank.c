@@ -20,9 +20,9 @@ FITUR:
 * Bisa menghitung bunga tunggal jika sudah menjadi nasabah selama beberapa tahun (RECURSION)
 
 PEMBAGIAN TUGAS:
-* Ari: login, transfer
-* Aziz: bikin akun, admin, nasabah
-* Naufal: cek bunga, sorting
+* Ari: login, loginSukses
+* Aziz: bikinAkun, admin, nasabah
+* Naufal: cek bunga, sortName, sortSaldo
 *********************************************
 TEKNIK KOMPUTER
 UNIVERSITAS INDONESIA
@@ -63,7 +63,7 @@ void sortSaldo(int size, int jumlahNasabah);
 
 int main(){
     int opsiUser;
-
+    system("CLS");
     printf("SELAMAT DATANG DI BANK JAGO\n");
     sleep(1);
     printf("MASUK SEBAGAI\n1. NASABAH\n2. ADMIN\nPILIHAN: ");
@@ -82,17 +82,21 @@ int main(){
 void nasabah(){
     int menu;
     system("CLS");
+    printf("ANDA MASUK SEBAGAI NASABAH\n==================================\n");
     printf("SILAKAN PILIH JENIS MENU YANG TERSEDIA\n");
     printf("1. MEMBUAT AKUN BARU\n2. SUDAH MEMPUNYAI AKUN\nPILIHAN: ");
     scanf("%d", &menu);
     switch(menu){
         case 1:
+        sleep(1);
         bikinAkun();
         break;
         case 2:
+        sleep(1);
         login();
         break;
         default:
+        sleep(1);
         printf("PILIHAN TIDAK DITEMUKAN\n");
     }
 }
@@ -228,6 +232,7 @@ void login(){
     Akun data[100];
     Pin datum[100];
     int count = lineCount(), found = 0, foundIndex = 0, i, convertPass, tempPass;
+    double saldo;
     char buffer[100], tempUser[100];
 
     system("CLS");
@@ -256,6 +261,14 @@ void login(){
     }
     fclose(fptr);
 
+    // input saldo yang benar dari .txt
+    fptr = fopen("database.txt", "r");
+    for(i = 0; i < foundIndex + 6; i++){
+        fgets(buffer, 100, fptr); // skip baris
+    }
+    fscanf(fptr, "%lf", &saldo);
+    fclose(fptr);
+
     // input password yang benar dari .txt
     fptr = fopen("database.txt", "r");
     for(i = 0; i < foundIndex + 1; i++){
@@ -274,14 +287,14 @@ void login(){
     }
 
     if(tempPass == convertPass){
-        loginSukses();
+        loginSukses(saldo);
     } else{
         printf("PIN YANG ANDA MASUKKAN SALAH\n");
         exit(0);
     }
 }
 
-void loginSukses(){
+void loginSukses(double saldo){
     Akun data;
     Pin datum;
     int opsiUser;
@@ -297,10 +310,10 @@ void loginSukses(){
     scanf("%d", &opsiUser);
     switch(opsiUser){
         case 1:
-        //printf("%d", data.saldo);
+        printf("\nSaldo Anda: Rp%.2f \n", saldo);
         break;
         case 2:
-        // bungaBank();
+        bungaBank(saldo);
         break;
         default:
         printf("PILIHAN TIDAK DITEMUKAN\n");
@@ -309,12 +322,12 @@ void loginSukses(){
 
 void bungaBank(double saldo){
 	double durasi, temp, bunga = 0.0375;
-    printf("Bunga simpanan Bank Jago berada pada level 3.75%% per tahun \n");
-	printf("Berapa lama waktu anda menabung (dalam tahun)? ");
+    printf("BUNGA SIMPANAN BANK JAGO BERADA PADA LEVEL 3.75%% PER TAHUN \n");
+	printf("BERAPA LAMA WAKTU ANDA MENABUNG (DALAM TAHUN)? ");
 	scanf("%lf", &durasi);
 
     temp = menghitungBunga(saldo, durasi, bunga);
-    printf("Saldo anda adalah %.1f setelah menabung selama %.1f tahun", temp, durasi);
+    printf("SALDO ANDA ADALAH %.1f SETELAH MENABUNG SELAMA %.1f TAHUN", temp, durasi);
 }
 
 // fungsi rekursi
@@ -433,7 +446,7 @@ void sortSaldo(int size, int jumlahNasabah){
     //display sorted saldo
     printf("\nSALDO YANG SUDAH DIURUTKAN:\n");
     for(i = 0; i < jumlahNasabah; i++){
-        printf("%s: %f\n",data[i].namaDepan, data[i].saldo);
+        printf("%s: %.2f\n",data[i].namaDepan, data[i].saldo);
 	}
 	
 	//make new file with sorted saldo
