@@ -17,7 +17,6 @@ FITUR:
 * Sistem bisa mengurutkan berdasarkan jumlah saldo, nama atau nomor rekening (ada pilihan admin dan nasabah di awal program) (S0RTING)
 * Bisa menyimpan informasi Biodata pembuat rekening (termasuk password) dan melakukan pendaftaran rekening jika belum punya (STRUCT)
 * Bisa cek informasi saldo rekening (FILE HANDLING)
-* Bisa transfer rekening ke tujuan (SEARCHING)
 * Bisa menghitung bunga tunggal jika sudah menjadi nasabah selama beberapa tahun (RECURSION)
 
 PEMBAGIAN TUGAS:
@@ -54,10 +53,13 @@ void admin();
 void nasabah();
 void bikinAkun();
 void akunBerhasilDibuat();
+void login();
+void loginSukses();
 int lineCount();
 void bungaBank();
 double menghitungBunga(double initial, double waktu, double bunga);
-void transfer();
+void sortName(int size, int jumlahNasabah);
+void sortSaldo(int size, int jumlahNasabah);
 
 int main(){
     int opsiUser;
@@ -99,21 +101,38 @@ void admin(){
     FILE *fptr;
     Pin datum;
     int menu;
+    int count = lineCount();
+    int jumlahNasabah = count / 7;
     
     system("CLS");
     printf("ANDA MASUK SEBAGAI ADMIN\n==================================\n");
     fptr = fopen("database.txt", "r");
     if(fptr == NULL){
         printf("FILE DATABASE TIDAK DITEMUKAN\n");
-    } else{
-        int count = lineCount();
-        printf("JUMLAH TOTAL NASABAH: %d \n", count / 7);
-    }
+    } 
+    fclose(fptr);
     printf("SILAKAN MASUKKAN PIN ADMIN: ");
     scanf("%d", &datum.passAdmin);
     if(datum.passAdmin == 000){
-        printf("1. SORT\n2. SEARCH REKENING\nPILIHAN: ");
+        printf("JUMLAH TOTAL NASABAH: %d \n", jumlahNasabah);
+        printf("1. SORT\n2. CLEAR DATABASE\nPILIHAN: ");
         scanf("%d", &menu);
+        if(menu == 1){
+            printf("\nURUT BERDASARKAN:\n1. NAMA\n2. SALDO (DARI YANG TERBESAR)\nPILIHAN: ");
+            scanf("%d", &menu);
+            if(menu == 1){
+                sortName(count, jumlahNasabah);
+            } else if(menu == 2){
+                sortSaldo(count, jumlahNasabah);
+            }
+        } else if(menu == 2){
+            fopen("database.txt", "w");
+            fclose(fptr);
+            printf("DATABASE BERHASIL DIHAPUS...\n");
+            sleep(2);
+        } else{
+            printf("MENU TIDAK TERSEDIA \n");
+        }
     } else{
         printf("PASSWORD SALAH! \n");
     }
@@ -204,25 +223,6 @@ int lineCount(){
     return count;
 }
 
-void bungaBank(double saldo){
-	double durasi, temp, bunga = 0.0375;
-    printf("Bunga simpanan Bank Jago berada pada level 3.75%% per tahun \n");
-	printf("Berapa lama waktu anda menabung (dalam tahun)? ");
-	scanf("%lf", &durasi);
-
-    temp = menghitungBunga(saldo, durasi, bunga);
-    printf("Saldo anda adalah %.1f setelah menabung selama %.1f tahun", temp, durasi);
-}
-
-// fungsi rekursi
-double menghitungBunga(double initial, double waktu, double bunga){
-    if(waktu > 0){
-        return menghitungBunga(initial, waktu - 1, bunga) + (bunga * initial);
-    } else{
-        return initial;
-    }
-}
-
 void login(){
     FILE *fptr;
     Akun data[100];
@@ -293,19 +293,156 @@ void loginSukses(){
     sleep(1);
     printf("SELAMAT DATANG %s %s\n", data.namaDepan, data.namaBelakang); //perlu ada nama
     printf("PILIH MENU YANG TERSEDIA\n");
-    printf("1. CEK SALDO\n2. TRANSFER\n3. CEK BUNGA\nPILIHAN: ");
+    printf("1. CEK SALDO\n2. CEK BUNGA\nPILIHAN: ");
     scanf("%d", &opsiUser);
     switch(opsiUser){
         case 1:
         //printf("%d", data.saldo);
         break;
         case 2:
-        //transfer();
-        break;
-        case 3:
         // bungaBank();
         break;
         default:
         printf("PILIHAN TIDAK DITEMUKAN\n");
     }
+}
+
+void bungaBank(double saldo){
+	double durasi, temp, bunga = 0.0375;
+    printf("Bunga simpanan Bank Jago berada pada level 3.75%% per tahun \n");
+	printf("Berapa lama waktu anda menabung (dalam tahun)? ");
+	scanf("%lf", &durasi);
+
+    temp = menghitungBunga(saldo, durasi, bunga);
+    printf("Saldo anda adalah %.1f setelah menabung selama %.1f tahun", temp, durasi);
+}
+
+// fungsi rekursi
+double menghitungBunga(double initial, double waktu, double bunga){
+    if(waktu > 0){
+        return menghitungBunga(initial, waktu - 1, bunga) + (bunga * initial);
+    } else{
+        return initial;
+    }
+}
+
+// sort secara alfabet (BINARY SORTING)
+void sortName(int size, int jumlahNasabah){
+    FILE *fptr;
+    int i, j, n;
+    char buffer[100];
+    Akun data[100];
+    Akun temp;
+
+    fptr = fopen("database.txt", "r");
+    if(fptr == NULL){
+        printf("ERROR DATABASE TIDAK DITEMUKAN \n");
+        exit(1);
+    }
+    //input nama dari .txt
+    for(int j = 0; j < 2; j++){
+        fgets(buffer, 100, fptr); // skip baris
+    }
+    for(i = 0; i < jumlahNasabah; i++){
+        fscanf(fptr, "%[^\n]%*c", data[i].namaDepan);
+        strtok(data[i].namaDepan, "\n");
+        for(int j = 0; j < 6; j++){
+            fgets(buffer, 100, fptr); // skip baris
+        }
+    }
+    fclose(fptr);
+
+    // swapping
+    for (i = 0; i < jumlahNasabah - 1; i++) {
+        for (j = 0; j < jumlahNasabah - i - 1; j++) {
+            if (strcmp(data[j].namaDepan, data[j + 1].namaDepan) > 0) {
+                temp = data[j];
+                data[j] = data[j + 1];
+                data[j + 1] = temp;
+            }
+        }
+    }
+    
+    printf("\nNAMA YANG SUDAH DIURUTKAN:\n");
+    for(i = 0; i < jumlahNasabah; i++){
+        printf("%s\n",data[i].namaDepan);
+	}
+	
+	fptr = fopen("sorted_name.txt","w");
+    if(fptr == NULL){
+        printf("MEMBUAT FILE BARU...\n");
+	}
+	for(i = 0; i < jumlahNasabah; i++){
+		fprintf(fptr,"%s\n",data[i].namaDepan);
+	}
+    fclose(fptr);
+}
+
+// sort berdasarkan saldo (SELECTION SORTING)
+void sortSaldo(int size, int jumlahNasabah){
+    FILE *fptr;
+    char buffer[100];
+    int i, j, max_idx;
+    Akun data[100];
+    Akun temp;
+
+    fptr = fopen("database.txt", "r");
+    if(fptr == NULL){
+        printf("ERROR DATABASE TIDAK DITEMUKAN \n");
+        exit(1);
+    }
+
+    //input nama dari .txt
+    for(int j = 0; j < 2; j++){
+        fgets(buffer, 100, fptr); // skip baris
+    }
+    for(i = 0; i < jumlahNasabah; i++){
+        fscanf(fptr, "%[^\n]%*c", data[i].namaDepan);
+        strtok(data[i].namaDepan, "\n");
+        for(int j = 0; j < 6; j++){
+            fgets(buffer, 100, fptr); // skip baris
+        }
+    }
+    fclose(fptr);
+    //input saldo dari .txt
+    fptr = fopen("database.txt", "r");
+    for(int j = 0; j < 6; j++){
+        fgets(buffer, 100, fptr); // skip baris
+    }
+    for(i = 0; i < jumlahNasabah; i++){
+        fscanf(fptr, "%lf", &data[i].saldo);
+        for(int j = 0; j < 7; j++){
+            fgets(buffer, 100, fptr); // skip baris
+        }
+    }
+    fclose(fptr);
+
+    //swapping
+    for (i = 0; i < jumlahNasabah - 1; i++) {
+        max_idx = i;
+        for (j = i + 1; j < jumlahNasabah; j++) {
+            if (data[j].saldo > data[max_idx].saldo) {
+                max_idx = j;
+            }
+        }
+        temp = data[max_idx];
+        data[max_idx] = data[i];
+        data[i] = temp;
+    }
+    
+    //display sorted saldo
+    printf("\nSALDO YANG SUDAH DIURUTKAN:\n");
+    for(i = 0; i < jumlahNasabah; i++){
+        printf("%s: %f\n",data[i].namaDepan, data[i].saldo);
+	}
+	
+	//make new file with sorted saldo
+	fptr=fopen("sorted_saldo.txt","w");
+    if(fptr == NULL){
+        printf("MEMBUAT FILE BARU...\n");
+	}
+	for(i=0; i < jumlahNasabah; i++){
+		fprintf(fptr,"%f\n",data[i].saldo);
+	}
+    fclose(fptr);
 }
