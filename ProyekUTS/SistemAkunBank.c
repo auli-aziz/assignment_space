@@ -54,7 +54,7 @@ void nasabah();
 void bikinAkun();
 void akunBerhasilDibuat();
 void login();
-void loginSukses();
+void loginSukses(double saldo, char name[]);
 int lineCount();
 void bungaBank();
 double menghitungBunga(double initial, double waktu, double bunga);
@@ -233,7 +233,7 @@ void login(){
     Pin datum[100];
     int count = lineCount(), found = 0, foundIndex = 0, i, convertPass, tempPass;
     double saldo;
-    char buffer[100], tempUser[100];
+    char buffer[100], tempUser[100], tempName[100];
 
     system("CLS");
     printf("LAMAN LOGIN\n==================\n\n");
@@ -269,6 +269,14 @@ void login(){
     fscanf(fptr, "%lf", &saldo);
     fclose(fptr);
 
+    // input nama panjang yang benar dari .txt
+    fptr = fopen("database.txt", "r");
+    for(i = 0; i < foundIndex + 2; i++){
+        fgets(buffer, 100, fptr); // skip baris
+    }
+    fscanf(fptr, "%[^\n]%*c", tempName);
+    fclose(fptr);
+
     // input password yang benar dari .txt
     fptr = fopen("database.txt", "r");
     for(i = 0; i < foundIndex + 1; i++){
@@ -287,14 +295,14 @@ void login(){
     }
 
     if(tempPass == convertPass){
-        loginSukses(saldo);
+        loginSukses(saldo, tempName);
     } else{
         printf("PIN YANG ANDA MASUKKAN SALAH\n");
         exit(0);
     }
 }
 
-void loginSukses(double saldo){
+void loginSukses(double saldo, char name[]){
     Akun data;
     Pin datum;
     int opsiUser;
@@ -304,7 +312,7 @@ void loginSukses(double saldo){
     sleep(2);
     system("CLS");
     sleep(1);
-    printf("SELAMAT DATANG %s %s\n", data.namaDepan, data.namaBelakang); //perlu ada nama
+    printf("SELAMAT DATANG %s\n", name);
     printf("PILIH MENU YANG TERSEDIA\n");
     printf("1. CEK SALDO\n2. CEK BUNGA\nPILIHAN: ");
     scanf("%d", &opsiUser);
