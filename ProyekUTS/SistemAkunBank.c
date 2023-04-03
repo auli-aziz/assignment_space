@@ -40,7 +40,7 @@ typedef struct Akun {
 
 typedef struct Pin {
     int passAdmin;
-    char password[100];
+    char pin[100];
 } Pin;
 
 typedef struct Transfer {
@@ -138,7 +138,7 @@ void admin(){
             printf("MENU TIDAK TERSEDIA \n");
         }
     } else{
-        printf("PASSWORD SALAH! \n");
+        printf("PIN SALAH! \n");
     }
 }
 
@@ -173,13 +173,13 @@ void bikinAkun(){
     printf("USERNAME (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
     getchar();
     fgets(data.username, sizeof(data.username), stdin);
-    printf("MASUKKAN PASSWORD (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
+    printf("MASUKKAN PIN (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
     for (i = 0; i < 50; i++) {
         ch = getch();
         if (ch == 13) {
             break;
         } else if(ch != 8){
-            datum.password[i] = ch;
+            datum.pin[i] = ch;
             ch = '*';
             printf("%c", ch);
         }
@@ -187,7 +187,7 @@ void bikinAkun(){
 
     fptr = fopen("database.txt", "a");
     fprintf(fptr, "%s", data.username);
-    fprintf(fptr, "%s \n", datum.password);
+    fprintf(fptr, "%s \n", datum.pin);
     fprintf(fptr, "%s %s", data.namaDepan, data.namaBelakang);
     fprintf(fptr, "%s", data.namaIbu);
     fprintf(fptr, "%s", data.alamat);
@@ -277,14 +277,14 @@ void login(){
     fscanf(fptr, "%[^\n]%*c", tempName);
     fclose(fptr);
 
-    // input password yang benar dari .txt
+    // input pin yang benar dari .txt
     fptr = fopen("database.txt", "r");
     for(i = 0; i < foundIndex + 1; i++){
         fgets(buffer, 100, fptr); // skip baris
     }
-    fscanf(fptr, "%[^\n]%*c", datum[i].password);
+    fscanf(fptr, "%[^\n]%*c", datum[i].pin);
     fclose(fptr);
-    convertPass = atoi(datum[i].password);
+    convertPass = atoi(datum[i].pin);
 
     if(found == 0){
         printf("USERNAME TIDAK DITEMUKAN \n");
