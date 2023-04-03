@@ -21,7 +21,7 @@ FITUR:
 * Bisa menghitung bunga tunggal jika sudah menjadi nasabah selama beberapa tahun (RECURSION)
 
 PEMBAGIAN TUGAS:
-* Ari: login
+* Ari: login, transfer
 * Aziz: bikin akun, admin, nasabah
 * Naufal: cek bunga, sorting
 *********************************************
@@ -53,9 +53,8 @@ typedef struct Transfer {
 void admin();
 void nasabah();
 void bikinAkun();
-void login();
-void loginSukses();
-void lineCount();
+void akunBerhasilDibuat();
+int lineCount();
 void bungaBank();
 double menghitungBunga(double initial, double waktu, double bunga);
 void transfer();
@@ -89,7 +88,7 @@ void nasabah(){
         bikinAkun();
         break;
         case 2:
-
+        login();
         break;
         default:
         printf("PILIHAN TIDAK DITEMUKAN\n");
@@ -102,13 +101,13 @@ void admin(){
     int menu;
     
     system("CLS");
-    printf("ANDA MASUK SEBAGAI ADMIN\n");
-    printf("==================================\n");
+    printf("ANDA MASUK SEBAGAI ADMIN\n==================================\n");
     fptr = fopen("database.txt", "r");
     if(fptr == NULL){
         printf("FILE DATABASE TIDAK DITEMUKAN\n");
     } else{
-        lineCount();
+        int count = lineCount();
+        printf("JUMLAH TOTAL NASABAH: %d \n", count / 7);
     }
     printf("SILAKAN MASUKKAN PIN ADMIN: ");
     scanf("%d", &datum.passAdmin);
@@ -128,8 +127,7 @@ void bikinAkun(){
     char ch;
 
     system("CLS");
-    printf("MENU PEMBUATAN AKUN BARU BANK JAGO\n");
-    printf("==================================\n");
+    printf("MENU PEMBUATAN AKUN BARU BANK JAGO\n==================================\n");
     sleep(1);
     printf("NAMA DEPAN: ");
     getchar();
@@ -147,7 +145,7 @@ void bikinAkun(){
     scanf("%d", &data.bulan);
     getchar();
     scanf("%d", &data.tahun);
-    printf("MASUKKAN SALDO AWAL: ");
+    printf("SALDO AWAL: Rp");
     scanf("%lf", &data.saldo);
     printf("USERNAME (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
     getchar();
@@ -166,17 +164,33 @@ void bikinAkun(){
 
     fptr = fopen("database.txt", "a");
     fprintf(fptr, "%s", data.username);
-    fprintf(fptr, "%f", data.saldo);
     fprintf(fptr, "%s \n", datum.password);
     fprintf(fptr, "%s %s", data.namaDepan, data.namaBelakang);
     fprintf(fptr, "%s", data.namaIbu);
     fprintf(fptr, "%s", data.alamat);
     fprintf(fptr, "%d/%d/%d \n", data.tanggal, data.bulan, data.tahun);
-    fprintf(fptr, "========================\n");
+    fprintf(fptr, "%.1f \n", data.saldo);
     fclose(fptr);
+
+    akunBerhasilDibuat();
 }
 
-void lineCount(){
+void akunBerhasilDibuat(){
+    int i;
+    char ch;
+    system("CLS");
+    printf(
+        "HARAP TUNGGU....\n\nDATA SEDANG DIPROSES....\n\n");
+    sleep(5);
+
+    printf("AKUN BERHASIL DIBIKIN! \n");
+    printf("TEKAN ENTER UNTUK LOGIN ");
+
+    getch();
+    login();
+}
+
+int lineCount(){
     FILE *fptr;
     char c;
     int count = 1; 
@@ -186,7 +200,8 @@ void lineCount(){
         if(c == '\n') count++;
     }
     fclose(fptr);
-    printf("JUMLAH TOTAL NASABAH: %d \n", count / 7);
+
+    return count;
 }
 
 void bungaBank(double saldo){
@@ -210,69 +225,87 @@ double menghitungBunga(double initial, double waktu, double bunga){
 
 void login(){
     FILE *fptr;
-    Akun data;
-    Pin datum;
-    int isFound = 0;
-    char temp[100];
+    Akun data[100];
+    Pin datum[100];
+    int count = lineCount(), found = 0, foundIndex = 0, i, convertPass, tempPass;
+    char buffer[100], tempUser[100];
+
+    system("CLS");
+    printf("LAMAN LOGIN\n==================\n\n");
+
+    fptr = fopen("database.txt", "r");
+
+    if(fptr == NULL){
+        printf("ERROR! DATABASE TIDAK TERSEDIA. HUBUNGI PETUGAS BANK\n");
+        exit(0);
+    }
 
     printf("MASUKKAN USERNAME: ");
-    scanf("%s", &temp);
-    fptr = fopen("database.txt", "r");
-    while(fscanf(fptr, "%s %s %s %s %s %d/%d/%d %s %s", data.namaDepan, data.namaBelakang, data.namaIbu, data.alamat, data.username, &data.tanggal, &data.bulan, &data.tahun, datum.password, datum.passAdmin) != EOF){
-        if(strcmp(data.username, temp) == 0){
-            isFound = 1;
-            break;
+    scanf("%s", tempUser);
+
+    //search username (LINEAR SEARCH)
+    for(i = 0; i < count; i += 7){
+        fscanf(fptr, "%[^\n]%*c", data[i].username);
+        if(strcmp(data[i].username, tempUser) == 0){
+            found = 1;
+            foundIndex = i;
         }
-    }
-    if(isFound){
-        char pass[100];
-        int i = 0;
-        printf("MASUKKAN PASSWORD: ");
-        while(1) {
-            char c = getch();
-            if(c == '\r') {
-                break;
-            } else if(c == '\b') {
-                if(i > 0) {
-                    i--;
-                    pass[i] = '\0';
-                    printf("\b \b");
-                }
-            } else {
-                pass[i++] = c;
-                printf("*");
-            }
+        for(int j = 0; j < 6; j++){
+            fgets(buffer, 100, fptr); // skip baris
         }
-        if(strcmp(datum.password, pass) == 0){
-            loginPage();
-        } else{
-            printf("\nPASSWORD SALAH!\n");
-        }
-    } else{
-        printf("\nUSERNAME TIDAK DITEMUKAN!\n");
     }
     fclose(fptr);
+
+    // input password yang benar dari .txt
+    fptr = fopen("database.txt", "r");
+    for(i = 0; i < foundIndex + 1; i++){
+        fgets(buffer, 100, fptr); // skip baris
+    }
+    fscanf(fptr, "%[^\n]%*c", datum[i].password);
+    fclose(fptr);
+    convertPass = atoi(datum[i].password);
+
+    if(found == 0){
+        printf("USERNAME TIDAK DITEMUKAN \n");
+        exit(0);
+    } else{
+        printf("MASUKKAN PIN ANDA: ");
+        scanf("%d", &tempPass);
+    }
+
+    if(tempPass == convertPass){
+        loginSukses();
+    } else{
+        printf("PIN YANG ANDA MASUKKAN SALAH\n");
+        exit(0);
+    }
 }
 
 void loginSukses(){
+    Akun data;
+    Pin datum;
+    int opsiUser;
+
+    sleep(1);
     printf("\nLOGIN SUKSES!\n");
-            int opsiUser;
-            sleep(1);
-            printf("SELAMAT DATANG %s %s\n", data.namaDepan, data.namaBelakang);
-            printf("PILIH MENU YANG TERSEDIA\n");
-            printf("1. CEK SALDO\n2. TRANSFER\n3. CEK BUNGA\nPILIHAN: ");
-            scanf("%d", &opsiUser);
-            switch(opsiUser){
-                case 1:
-                cekSaldo(temp);
-                break;
-                case 2:
-                transfer(temp);
-                break;
-                case 3:
-                bungaBank();
-                break;
-                default:
-                printf("PILIHAN TIDAK DITEMUKAN\n");
-            }
+    sleep(2);
+    system("CLS");
+    sleep(1);
+    printf("SELAMAT DATANG %s %s\n", data.namaDepan, data.namaBelakang); //perlu ada nama
+    printf("PILIH MENU YANG TERSEDIA\n");
+    printf("1. CEK SALDO\n2. TRANSFER\n3. CEK BUNGA\nPILIHAN: ");
+    scanf("%d", &opsiUser);
+    switch(opsiUser){
+        case 1:
+        //printf("%d", data.saldo);
+        break;
+        case 2:
+        //transfer();
+        break;
+        case 3:
+        // bungaBank();
+        break;
+        default:
+        printf("PILIHAN TIDAK DITEMUKAN\n");
+    }
 }
