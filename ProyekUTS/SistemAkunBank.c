@@ -14,13 +14,11 @@ ANGGOTA:
 * Muhammad Abrisam Cahyo Juhartono || 2206026050
 * Aulia Anugrah Aziz || 2206059364
 * Naufal Rusyda Santosa || 2206813353
-
 FITUR:
 * Sistem bisa mengurutkan berdasarkan jumlah saldo, nama atau nomor rekening (ada pilihan admin dan nasabah di awal program) (S0RTING)
 * Bisa menyimpan informasi Biodata pembuat rekening (termasuk password) dan melakukan pendaftaran rekening jika belum punya (STRUCT)
 * Bisa cek informasi saldo rekening (FILE HANDLING)
 * Bisa menghitung bunga tunggal jika sudah menjadi nasabah selama beberapa tahun (RECURSION)
-
 PEMBAGIAN TUGAS:
 * Ari: login, loginSukses
 * Aziz: bikinAkun, admin, nasabah
@@ -186,7 +184,7 @@ void bikinAkun(){
     FILE *fptr;
     Akun data;
     Pin datum;
-    int i, pinCount = 0;
+    int i;
     char ch;
 
     system("CLS");
@@ -213,27 +211,24 @@ void bikinAkun(){
     printf("USERNAME (DAPAT BERUPA HURUF SAJA): ");
     getchar();
     fgets(data.username, sizeof(data.username), stdin);
-    while(pinCount < 6){
-        printf("MASUKKAN PIN (MINIMAL 6 ANGKA): ");
-        while (1) {
-            ch = getch(); // input karakter
-            if (ch == 13) { // cek bila enter ditekan
-                break; 
-            } else if (ch == 8) { // cek bila Backspace ditekan
-                if (i > 0) {
-                    i--;
-                    datum.pin[i] = '\0'; // remove karakter terakhir dari memori
-                    printf("\b \b"); // hapus karakter terakhir pada output
-                    pinCount--;
-                }
-            } else {
-                datum.pin[i++] = ch; // simpan karakter pada struct
-                pinCount++;
-                printf("*"); // display '*' pada output
+    
+    printf("MASUKKAN PIN (HANYA DAPAT BERUPA ANGKA): ");
+    while (1) {
+        ch = getch(); // input karakter
+        if (ch == 13) { // cek bila enter ditekan
+            break; 
+        } else if (ch == 8) { // cek bila Backspace ditekan
+            if (i > 0) {
+                i--;
+                datum.pin[i] = '\0'; // remove karakter terakhir dari memori
+                printf("\b \b"); // hapus karakter terakhir pada output
             }
+        } else {
+            datum.pin[i++] = ch; // simpan karakter pada struct
+            printf("*"); // display '*' pada output
         }
-        if(pinCount < 6) printf("\nPIN TERLALU PENDEK\n");
     }
+    
 
     datum.pin[i] = '\0';
 
