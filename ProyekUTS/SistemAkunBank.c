@@ -21,7 +21,7 @@ FITUR:
 * Bisa menghitung bunga tunggal jika sudah menjadi nasabah selama beberapa tahun (RECURSION)
 PEMBAGIAN TUGAS:
 * Ari: login, loginSukses
-* Aziz: bikinAkun, admin, nasabah
+* Aziz: bikinAkun, admin, nasabah, debugging seluruh program
 * Naufal: cek bunga, sortName, sortSaldo
 *********************************************
 TEKNIK KOMPUTER
@@ -112,7 +112,7 @@ void admin(){
     printf("ANDA MASUK SEBAGAI ADMIN\n==================================\n");
     fptr = fopen("database.txt", "r");
     if(fptr == NULL){
-        printf("JUMLAH TOTAL NASABAH: 0\n");
+        printf("\nJUMLAH TOTAL NASABAH: 0\n");
         sleep(5); main();
     } 
     fclose(fptr);
@@ -146,7 +146,7 @@ void admin(){
     convertPin = atoi(datum.pinAdmin);
 
     if(convertPin == 987654321){
-        printf("JUMLAH TOTAL NASABAH: %d \n", jumlahNasabah);
+        printf("\nJUMLAH TOTAL NASABAH: %d \n", jumlahNasabah);
         printf("1. SORT\n2. CLEAR DATABASE\n3. KEMBALI KE MENU UTAMA\nPILIHAN: ");
         scanf("%d", &menu);
         if(menu == 1){
