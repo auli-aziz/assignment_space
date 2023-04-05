@@ -41,15 +41,9 @@ typedef struct Akun {
 } Akun;
 
 typedef struct Pin {
-    int passAdmin;
+    char pinAdmin[SIZE];
     char pin[SIZE];
 } Pin;
-
-typedef struct Transfer {
-    char tujuan[SIZE];
-    char asal[SIZE];
-    long int uang;
-} Transfer;
 
 void admin();
 void nasabah();
@@ -112,10 +106,10 @@ void nasabah(){
 void admin(){
     FILE *fptr;
     Pin datum;
-    int menu;
-    int count = lineCount();
-    int jumlahNasabah = count / 7;
-    
+    int menu, convertPin, i = 0;
+    int count = lineCount(), jumlahNasabah = count / 7;
+    char ch;
+
     system("CLS");
     printf("ANDA MASUK SEBAGAI ADMIN\n==================================\n");
     fptr = fopen("database.txt", "r");
@@ -124,9 +118,36 @@ void admin(){
         sleep(5); main();
     } 
     fclose(fptr);
+
     printf("SILAKAN MASUKKAN PIN ADMIN: ");
-    scanf("%d", &datum.passAdmin);
-    if(datum.passAdmin == 987654321){
+    while (1) {
+        ch = getch(); 
+        if (ch == 13) { 
+            break; 
+        } else if (ch == 8) { 
+            if (i > 0) {
+                i--;
+                datum.pinAdmin[i] = '\0'; 
+                printf("\b \b"); 
+            }
+        } else {
+            datum.pinAdmin[i++] = ch; 
+            printf("*"); 
+        }
+    }
+    datum.pinAdmin[i] = '\0'; 
+
+    fptr = fopen("pin.txt", "w");
+    fprintf(fptr, "%s", datum.pinAdmin);
+    fclose(fptr);
+
+    fptr = fopen("pin.txt", "r");
+    fscanf(fptr, "%[^\n]%*c", datum.pinAdmin);
+    fclose(fptr);
+
+    convertPin = atoi(datum.pinAdmin);
+
+    if(convertPin == 987654321){
         printf("JUMLAH TOTAL NASABAH: %d \n", jumlahNasabah);
         printf("1. SORT\n2. CLEAR DATABASE\n3. KEMBALI KE MENU UTAMA\nPILIHAN: ");
         scanf("%d", &menu);
@@ -142,10 +163,14 @@ void admin(){
                 sleep(3); admin();
             }
         } else if(menu == 2){
-            fopen("database.txt", "w");
+            fptr = fopen("database.txt", "w");
+            if(fptr == NULL){
+                printf("GAGAL MEMBUKA FILE database.txt\n");
+                return; 
+            }
             fclose(fptr);
             printf("DATABASE BERHASIL DIHAPUS...\n");
-            sleep(2);
+            sleep(5); admin();
         } else if(menu == 3){
             main();
         }else{
@@ -153,7 +178,7 @@ void admin(){
             sleep(5); admin();
         }
     } else{
-        printf("PIN SALAH! \n");
+        printf("\nPIN SALAH! \n");
     }
 }
 
@@ -190,18 +215,18 @@ void bikinAkun(){
     fgets(data.username, sizeof(data.username), stdin);
     printf("MASUKKAN PIN (DAPAT BERUPA ANGKA SAJA): ");
     while (1) {
-        ch = getch(); // get a character without displaying it
-        if (ch == 13) { // check if Enter key is pressed
-            break; // exit loop
-        } else if (ch == 8) { // check if Backspace key is pressed
+        ch = getch(); // input karakter
+        if (ch == 13) { // cek bila enter ditekan
+            break; 
+        } else if (ch == 8) { // cek bila Backspace ditekan
             if (i > 0) {
                 i--;
-                datum.pin[i] = '\0'; // remove last character from buffer
-                printf("\b \b"); // erase last character on the screen
+                datum.pin[i] = '\0'; // remove karakter terakhir dari memori
+                printf("\b \b"); // hapus karakter terakhir pada output
             }
         } else {
-            datum.pin[i++] = ch; // add character to buffer
-            printf("*"); // display '*' on the screen
+            datum.pin[i++] = ch; // simpan karakter pada struct
+            printf("*"); // display '*' pada output
         }
     }
 
@@ -253,9 +278,9 @@ void login(){
     FILE *fptr;
     Akun data[SIZE];
     Pin datum[SIZE];
-    int count = lineCount(), found = 0, foundIndex = 0, i, convertPass, tempPass;
+    int count = lineCount(), found = 0, foundIndex = 0, i, convertPin, tempPass;
     double saldo;
-    char buffer[SIZE], tempUser[SIZE], tempName[SIZE];
+    char buffer[SIZE], tempUser[SIZE], tempName[SIZE], ch;
 
     system("CLS");
     printf("LAMAN LOGIN\n==================\n\n");
@@ -306,23 +331,49 @@ void login(){
     }
     fscanf(fptr, "%[^\n]%*c", datum[i].pin);
     fclose(fptr);
-    convertPass = atoi(datum[i].pin);
+    convertPin = atoi(datum[i].pin);
 
     if(found == 0){
         printf("USERNAME TIDAK DITEMUKAN \n");
         exit(0);
     } else{
         printf("MASUKKAN PIN ANDA: ");
-        scanf("%d", &tempPass);
+        i = 0; // reset i for inputting pin
+        while (1) {
+            ch = getch(); 
+            if (ch == 13) { 
+                break; 
+            } else if (ch == 8) { 
+                if (i > 0) {
+                    i--;
+                    datum[0].pinAdmin[i] = '\0'; 
+                    printf("\b \b"); 
+                }
+            } else {
+                datum[0].pinAdmin[i++] = ch; 
+                printf("*"); 
+            }
+        }
+        datum[0].pinAdmin[i] = '\0'; 
+
+        fptr = fopen("pin.txt", "w");
+        fprintf(fptr, "%s", datum[0].pinAdmin);
+        fclose(fptr);
+
+        fptr = fopen("pin.txt", "r");
+        fscanf(fptr, "%[^\n]%*c", datum[0].pinAdmin);
+        fclose(fptr);
+
+        tempPass = atoi(datum[0].pinAdmin);
     }
 
-    if(tempPass == convertPass){
-        loginSukses(saldo, tempName);
+    if(tempPass == convertPin){
         sleep(1);
         printf("\nLOGIN SUKSES!\n");
         sleep(2);
+        loginSukses(saldo, tempName);
     } else{
-        printf("PIN YANG ANDA MASUKKAN SALAH\n");
+        printf("\nPIN YANG ANDA MASUKKAN SALAH\n");
         exit(0);
     }
 }
@@ -351,7 +402,7 @@ void loginSukses(double saldo, char name[]){
         bungaBank(saldo);
         break;
         case 3:
-        sleep(1); menu();
+        sleep(1); main();
         break;
         default:
         printf("PILIHAN TIDAK DITEMUKAN\n"); sleep(2);
