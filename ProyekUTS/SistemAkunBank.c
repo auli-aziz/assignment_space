@@ -213,21 +213,26 @@ void bikinAkun(){
     printf("USERNAME (DAPAT BERUPA HURUF SAJA): ");
     getchar();
     fgets(data.username, sizeof(data.username), stdin);
-    printf("MASUKKAN PIN (DAPAT BERUPA ANGKA SAJA): ");
-    while (1) {
-        ch = getch(); // input karakter
-        if (ch == 13) { // cek bila enter ditekan
-            break; 
-        } else if (ch == 8) { // cek bila Backspace ditekan
-            if (i > 0) {
-                i--;
-                datum.pin[i] = '\0'; // remove karakter terakhir dari memori
-                printf("\b \b"); // hapus karakter terakhir pada output
+    while(pinCount < 6){
+        printf("MASUKKAN PIN (MINIMAL 6 ANGKA): ");
+        while (1) {
+            ch = getch(); // input karakter
+            if (ch == 13) { // cek bila enter ditekan
+                break; 
+            } else if (ch == 8) { // cek bila Backspace ditekan
+                if (i > 0) {
+                    i--;
+                    datum.pin[i] = '\0'; // remove karakter terakhir dari memori
+                    printf("\b \b"); // hapus karakter terakhir pada output
+                    pinCount--;
+                }
+            } else {
+                datum.pin[i++] = ch; // simpan karakter pada struct
+                pinCount++;
+                printf("*"); // display '*' pada output
             }
-        } else {
-            datum.pin[i++] = ch; // simpan karakter pada struct
-            printf("*"); // display '*' pada output
         }
+        if(pinCount < 6) printf("\nPIN TERLALU PENDEK\n");
     }
 
     datum.pin[i] = '\0';
@@ -283,7 +288,7 @@ void login(){
     char buffer[SIZE], tempUser[SIZE], tempName[SIZE], ch;
 
     system("CLS");
-    printf("LAMAN LOGIN\n==================\n\n");
+    printf("LAMAN LOGIN\n==================\n");
 
     fptr = fopen("database.txt", "r");
 
@@ -369,7 +374,7 @@ void login(){
 
     if(tempPass == convertPin){
         sleep(1);
-        printf("\nLOGIN SUKSES!\n");
+        printf("\n\nLOGIN SUKSES!\n");
         sleep(2);
         loginSukses(saldo, tempName);
     } else{
