@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define SIZE 100
+#define LIMIT 50
 
 /*
 PEMROGRAMAN LANJUT 01
@@ -29,23 +31,23 @@ UNIVERSITAS INDONESIA
 */
 
 typedef struct Akun {
-    char namaDepan[25];
-    char namaBelakang[25];
-    char username[50];
-    char namaIbu[50];
-    char alamat[100];
+    char namaDepan[LIMIT];
+    char namaBelakang[LIMIT];
+    char username[LIMIT];
+    char namaIbu[LIMIT];
+    char alamat[SIZE];
     int tanggal, bulan, tahun;
     double saldo;
 } Akun;
 
 typedef struct Pin {
     int passAdmin;
-    char pin[100];
+    char pin[SIZE];
 } Pin;
 
 typedef struct Transfer {
-    char tujuan[100];
-    char asal[100];
+    char tujuan[SIZE];
+    char asal[SIZE];
     long int uang;
 } Transfer;
 
@@ -55,28 +57,30 @@ void bikinAkun();
 void akunBerhasilDibuat();
 void login();
 void loginSukses(double saldo, char name[]);
-int lineCount();
 void bungaBank();
 double menghitungBunga(double initial, double waktu, double bunga);
 void sortName(int size, int jumlahNasabah);
 void sortSaldo(int size, int jumlahNasabah);
+int lineCount();
 
 int main(){
     int opsiUser;
     system("CLS");
-    printf("SELAMAT DATANG DI BANK JAGO\n");
+    printf("SELAMAT DATANG DI BANK JAGO\n==================================\n");
     sleep(1);
-    printf("MASUK SEBAGAI\n1. NASABAH\n2. ADMIN\nPILIHAN: ");
+    printf("MASUK SEBAGAI\n1. NASABAH\n2. ADMIN\n3. KELUAR\nPILIHAN: ");
     scanf("%d", &opsiUser);
     if(opsiUser == 1){
         nasabah();
     } else if(opsiUser == 2){
         admin();
+    } else if(opsiUser == 3){
+        sleep(1); printf("==================================\nTERIMA KASIH TELAH MENGGUNAKAN BANK JAGO"); sleep(3);
+        exit(0);
     } else{
-        printf("MENU TIDAK TERSEDIA \n");
+        printf("\nMENU TIDAK TERSEDIA \n"); sleep(5);
+        main();
     }
-        
-    return 0;
 }
 
 void nasabah(){
@@ -84,7 +88,7 @@ void nasabah(){
     system("CLS");
     printf("ANDA MASUK SEBAGAI NASABAH\n==================================\n");
     printf("SILAKAN PILIH JENIS MENU YANG TERSEDIA\n");
-    printf("1. MEMBUAT AKUN BARU\n2. SUDAH MEMPUNYAI AKUN\nPILIHAN: ");
+    printf("1. MEMBUAT AKUN BARU\n2. SUDAH MEMPUNYAI AKUN\n3. KEMBALI KE MENU UTAMA\nPILIHAN: ");
     scanf("%d", &menu);
     switch(menu){
         case 1:
@@ -95,9 +99,13 @@ void nasabah(){
         sleep(1);
         login();
         break;
+        case 3:
+        main();
+        break;
         default:
-        sleep(1);
         printf("PILIHAN TIDAK DITEMUKAN\n");
+        sleep(1);
+        nasabah();
     }
 }
 
@@ -112,14 +120,15 @@ void admin(){
     printf("ANDA MASUK SEBAGAI ADMIN\n==================================\n");
     fptr = fopen("database.txt", "r");
     if(fptr == NULL){
-        printf("FILE DATABASE TIDAK DITEMUKAN\n");
+        printf("JUMLAH TOTAL NASABAH: 0\n");
+        sleep(5); main();
     } 
     fclose(fptr);
     printf("SILAKAN MASUKKAN PIN ADMIN: ");
     scanf("%d", &datum.passAdmin);
-    if(datum.passAdmin == 000){
+    if(datum.passAdmin == 987654321){
         printf("JUMLAH TOTAL NASABAH: %d \n", jumlahNasabah);
-        printf("1. SORT\n2. CLEAR DATABASE\nPILIHAN: ");
+        printf("1. SORT\n2. CLEAR DATABASE\n3. KEMBALI KE MENU UTAMA\nPILIHAN: ");
         scanf("%d", &menu);
         if(menu == 1){
             printf("\nURUT BERDASARKAN:\n1. NAMA\n2. SALDO (DARI YANG TERBESAR)\nPILIHAN: ");
@@ -128,14 +137,20 @@ void admin(){
                 sortName(count, jumlahNasabah);
             } else if(menu == 2){
                 sortSaldo(count, jumlahNasabah);
+            } else{
+                printf("\nMENU TIDAK TERSEDIA");
+                sleep(3); admin();
             }
         } else if(menu == 2){
             fopen("database.txt", "w");
             fclose(fptr);
             printf("DATABASE BERHASIL DIHAPUS...\n");
             sleep(2);
-        } else{
+        } else if(menu == 3){
+            main();
+        }else{
             printf("MENU TIDAK TERSEDIA \n");
+            sleep(5); admin();
         }
     } else{
         printf("PIN SALAH! \n");
@@ -146,7 +161,7 @@ void bikinAkun(){
     FILE *fptr;
     Akun data;
     Pin datum;
-    int i;
+    int i, pinCount = 0;
     char ch;
 
     system("CLS");
@@ -160,9 +175,9 @@ void bikinAkun(){
     fgets(data.namaBelakang, sizeof(data.namaBelakang), stdin);
     printf("NAMA IBU KANDUNG: ");
     fgets(data.namaIbu, sizeof(data.namaIbu), stdin);
-    printf("ALAMAT DOMISILI: ");
+    printf("ALAMAT DOMISILI (MAX 100 KARAKTER): ");
     fgets(data.alamat, sizeof(data.alamat), stdin);
-    printf("MASUKKAN TANGGAL LAHIR (HH/MM/YYYY): ");
+    printf("MASUKKAN TANGGAL LAHIR (HH/BB/TTTT): ");
     scanf("%d", &data.tanggal);
     getchar();
     scanf("%d", &data.bulan);
@@ -170,20 +185,27 @@ void bikinAkun(){
     scanf("%d", &data.tahun);
     printf("SALDO AWAL: Rp");
     scanf("%lf", &data.saldo);
-    printf("USERNAME (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
+    printf("USERNAME (DAPAT BERUPA HURUF SAJA): ");
     getchar();
     fgets(data.username, sizeof(data.username), stdin);
-    printf("MASUKKAN PIN (DAPAT BERUPA ANGKA DAN HURUF SAJA): ");
-    for (i = 0; i < 50; i++) {
-        ch = getch();
-        if (ch == 13) {
-            break;
-        } else if(ch != 8){
-            datum.pin[i] = ch;
-            ch = '*';
-            printf("%c", ch);
+    printf("MASUKKAN PIN (DAPAT BERUPA ANGKA SAJA): ");
+    while (1) {
+        ch = getch(); // get a character without displaying it
+        if (ch == 13) { // check if Enter key is pressed
+            break; // exit loop
+        } else if (ch == 8) { // check if Backspace key is pressed
+            if (i > 0) {
+                i--;
+                datum.pin[i] = '\0'; // remove last character from buffer
+                printf("\b \b"); // erase last character on the screen
+            }
+        } else {
+            datum.pin[i++] = ch; // add character to buffer
+            printf("*"); // display '*' on the screen
         }
     }
+
+    datum.pin[i] = '\0';
 
     fptr = fopen("database.txt", "a");
     fprintf(fptr, "%s", data.username);
@@ -229,11 +251,11 @@ int lineCount(){
 
 void login(){
     FILE *fptr;
-    Akun data[100];
-    Pin datum[100];
+    Akun data[SIZE];
+    Pin datum[SIZE];
     int count = lineCount(), found = 0, foundIndex = 0, i, convertPass, tempPass;
     double saldo;
-    char buffer[100], tempUser[100], tempName[100];
+    char buffer[SIZE], tempUser[SIZE], tempName[SIZE];
 
     system("CLS");
     printf("LAMAN LOGIN\n==================\n\n");
@@ -256,7 +278,7 @@ void login(){
             foundIndex = i;
         }
         for(int j = 0; j < 6; j++){
-            fgets(buffer, 100, fptr); // skip baris
+            fgets(buffer, SIZE, fptr); // skip baris
         }
     }
     fclose(fptr);
@@ -264,7 +286,7 @@ void login(){
     // input saldo yang benar dari .txt
     fptr = fopen("database.txt", "r");
     for(i = 0; i < foundIndex + 6; i++){
-        fgets(buffer, 100, fptr); // skip baris
+        fgets(buffer, SIZE, fptr); // skip baris
     }
     fscanf(fptr, "%lf", &saldo);
     fclose(fptr);
@@ -272,7 +294,7 @@ void login(){
     // input nama panjang yang benar dari .txt
     fptr = fopen("database.txt", "r");
     for(i = 0; i < foundIndex + 2; i++){
-        fgets(buffer, 100, fptr); // skip baris
+        fgets(buffer, SIZE, fptr); // skip baris
     }
     fscanf(fptr, "%[^\n]%*c", tempName);
     fclose(fptr);
@@ -280,7 +302,7 @@ void login(){
     // input pin yang benar dari .txt
     fptr = fopen("database.txt", "r");
     for(i = 0; i < foundIndex + 1; i++){
-        fgets(buffer, 100, fptr); // skip baris
+        fgets(buffer, SIZE, fptr); // skip baris
     }
     fscanf(fptr, "%[^\n]%*c", datum[i].pin);
     fclose(fptr);
@@ -296,6 +318,9 @@ void login(){
 
     if(tempPass == convertPass){
         loginSukses(saldo, tempName);
+        sleep(1);
+        printf("\nLOGIN SUKSES!\n");
+        sleep(2);
     } else{
         printf("PIN YANG ANDA MASUKKAN SALAH\n");
         exit(0);
@@ -307,35 +332,46 @@ void loginSukses(double saldo, char name[]){
     Pin datum;
     int opsiUser;
 
-    sleep(1);
-    printf("\nLOGIN SUKSES!\n");
-    sleep(2);
     system("CLS");
     sleep(1);
-    printf("SELAMAT DATANG %s\n", name);
+    printf("SELAMAT DATANG %s\n=========================\n", name);
     printf("PILIH MENU YANG TERSEDIA\n");
-    printf("1. CEK SALDO\n2. CEK BUNGA\nPILIHAN: ");
+    printf("1. CEK SALDO\n2. CEK BUNGA\n3. KEMBALI KE MENU UTAMA\nPILIHAN: ");
     scanf("%d", &opsiUser);
     switch(opsiUser){
         case 1:
         printf("\nSaldo Anda: Rp%.2f \n", saldo);
+        sleep(3);
+        printf("TEKAN ENTER UNTUK KEMBALI KE MENU UTAMA ");
+
+        getch();
+        main();
         break;
         case 2:
         bungaBank(saldo);
         break;
+        case 3:
+        sleep(1); menu();
+        break;
         default:
-        printf("PILIHAN TIDAK DITEMUKAN\n");
+        printf("PILIHAN TIDAK DITEMUKAN\n"); sleep(2);
+        loginSukses(saldo, name);
     }
 }
 
 void bungaBank(double saldo){
 	double durasi, temp, bunga = 0.0375;
-    printf("BUNGA SIMPANAN BANK JAGO BERADA PADA LEVEL 3.75%% PER TAHUN \n");
+    printf("\nBUNGA SIMPANAN BANK JAGO BERADA PADA LEVEL 3.75%% PER TAHUN \n");
 	printf("BERAPA LAMA WAKTU ANDA MENABUNG (DALAM TAHUN)? ");
 	scanf("%lf", &durasi);
 
     temp = menghitungBunga(saldo, durasi, bunga);
     printf("SALDO ANDA ADALAH %.1f SETELAH MENABUNG SELAMA %.1f TAHUN", temp, durasi);
+
+    sleep(3); printf("\n\nTEKAN ENTER UNTUK KEMBALI KE MENU UTAMA ");
+
+    getch();
+    main();
 }
 
 // fungsi rekursi
@@ -351,8 +387,8 @@ double menghitungBunga(double initial, double waktu, double bunga){
 void sortName(int size, int jumlahNasabah){
     FILE *fptr;
     int i, j, n;
-    char buffer[100];
-    Akun data[100];
+    char buffer[SIZE];
+    Akun data[SIZE];
     Akun temp;
 
     fptr = fopen("database.txt", "r");
@@ -362,13 +398,13 @@ void sortName(int size, int jumlahNasabah){
     }
     //input nama dari .txt
     for(int j = 0; j < 2; j++){
-        fgets(buffer, 100, fptr); // skip baris
+        fgets(buffer, SIZE, fptr); // skip baris
     }
     for(i = 0; i < jumlahNasabah; i++){
         fscanf(fptr, "%[^\n]%*c", data[i].namaDepan);
         strtok(data[i].namaDepan, "\n");
         for(int j = 0; j < 6; j++){
-            fgets(buffer, 100, fptr); // skip baris
+            fgets(buffer, SIZE, fptr); // skip baris
         }
     }
     fclose(fptr);
@@ -397,14 +433,19 @@ void sortName(int size, int jumlahNasabah){
 		fprintf(fptr,"%s\n",data[i].namaDepan);
 	}
     fclose(fptr);
+
+    sleep(3); printf("\nTEKAN ENTER UNTUK KEMBALI KE MENU UTAMA ");
+
+    getch();
+    main();
 }
 
 // sort berdasarkan saldo (SELECTION SORTING)
 void sortSaldo(int size, int jumlahNasabah){
     FILE *fptr;
-    char buffer[100];
+    char buffer[SIZE];
     int i, j, max_idx;
-    Akun data[100];
+    Akun data[SIZE];
     Akun temp;
 
     fptr = fopen("database.txt", "r");
@@ -415,25 +456,25 @@ void sortSaldo(int size, int jumlahNasabah){
 
     //input nama dari .txt
     for(int j = 0; j < 2; j++){
-        fgets(buffer, 100, fptr); // skip baris
+        fgets(buffer, SIZE, fptr); // skip baris
     }
     for(i = 0; i < jumlahNasabah; i++){
         fscanf(fptr, "%[^\n]%*c", data[i].namaDepan);
         strtok(data[i].namaDepan, "\n");
         for(int j = 0; j < 6; j++){
-            fgets(buffer, 100, fptr); // skip baris
+            fgets(buffer, SIZE, fptr); // skip baris
         }
     }
     fclose(fptr);
     //input saldo dari .txt
     fptr = fopen("database.txt", "r");
     for(int j = 0; j < 6; j++){
-        fgets(buffer, 100, fptr); // skip baris
+        fgets(buffer, SIZE, fptr); // skip baris
     }
     for(i = 0; i < jumlahNasabah; i++){
         fscanf(fptr, "%lf", &data[i].saldo);
         for(int j = 0; j < 7; j++){
-            fgets(buffer, 100, fptr); // skip baris
+            fgets(buffer, SIZE, fptr); // skip baris
         }
     }
     fclose(fptr);
@@ -466,4 +507,10 @@ void sortSaldo(int size, int jumlahNasabah){
 		fprintf(fptr,"%f\n",data[i].saldo);
 	}
     fclose(fptr);
+
+    sleep(3);
+    printf("\n\nTEKAN ENTER UNTUK KEMBALI KE MENU UTAMA ");
+
+    getch();
+    main();
 }
