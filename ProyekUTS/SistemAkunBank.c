@@ -8,7 +8,7 @@
 PEMROGRAMAN LANJUT 01
 TUGAS PROYEK KELOMPOK TENGAH SEMESTER
 JUDUL: SISTEM AKUN BANK
-LINK VIDEO: 
+LINK VIDEO: https://youtu.be/X6YJ5lrSbCY
 *********************************************
 ANGGOTA: 
 * Muhammad Abrisam Cahyo Juhartono || 2206026050
@@ -49,11 +49,12 @@ void bikinAkun();
 void akunBerhasilDibuat();
 void login();
 void loginSukses(double saldo, char name[]);
-void bungaBank();
+void bungaBank(double saldo);
 double menghitungBunga(double initial, double waktu, double bunga);
 void sortName(int size, int jumlahNasabah);
 void sortSaldo(int size, int jumlahNasabah);
 int lineCount();
+void swap(Akun *first, Akun *second);
 
 int main(){
     int opsiUser;
@@ -417,7 +418,7 @@ void bungaBank(double saldo){
 	scanf("%lf", &durasi);
 
     temp = menghitungBunga(saldo, durasi, bunga);
-    printf("SALDO ANDA ADALAH %.1f SETELAH MENABUNG SELAMA %.1f TAHUN", temp, durasi);
+    printf("SALDO ANDA ADALAH Rp%.1f SETELAH MENABUNG SELAMA %.1f TAHUN", temp, durasi);
 
     sleep(3); printf("\n\nTEKAN ENTER UNTUK KEMBALI KE MENU UTAMA ");
 
@@ -464,9 +465,7 @@ void sortName(int size, int jumlahNasabah){
     for (i = 0; i < jumlahNasabah - 1; i++) {
         for (j = 0; j < jumlahNasabah - i - 1; j++) {
             if (strcmp(data[j].namaDepan, data[j + 1].namaDepan) > 0) {
-                temp = data[j];
-                data[j] = data[j + 1];
-                data[j + 1] = temp;
+                swap(&data[j], &data[j + 1]);
             }
         }
     }
@@ -530,7 +529,6 @@ void sortSaldo(int size, int jumlahNasabah){
     }
     fclose(fptr);
 
-    //swapping
     for (i = 0; i < jumlahNasabah - 1; i++) {
         max_idx = i;
         for (j = i + 1; j < jumlahNasabah; j++) {
@@ -538,9 +536,7 @@ void sortSaldo(int size, int jumlahNasabah){
                 max_idx = j;
             }
         }
-        temp = data[max_idx];
-        data[max_idx] = data[i];
-        data[i] = temp;
+        swap(&data[max_idx], &data[i]);
     }
     
     //display sorted saldo
@@ -564,4 +560,11 @@ void sortSaldo(int size, int jumlahNasabah){
 
     getch();
     main();
+}
+
+//swapping dengan call by reference
+void swap(Akun *first, Akun *second){
+    Akun temp = *first;
+    *first = *second;
+    *second = temp;
 }
