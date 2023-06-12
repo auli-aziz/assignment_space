@@ -1,34 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
+#include <time.h>
+
 #define SIZE 100
 #define LIMIT 50
 
-/*
-PEMROGRAMAN LANJUT 01
-TUGAS PROYEK KELOMPOK TENGAH SEMESTER
-JUDUL: SISTEM AKUN BANK
-LINK VIDEO: https://youtu.be/X6YJ5lrSbCY
-*********************************************
-ANGGOTA: 
-* Muhammad Abrisam Cahyo Juhartono || 2206026050
-* Aulia Anugrah Aziz || 2206059364
-* Naufal Rusyda Santosa || 2206813353
-FITUR:
-* Sistem bisa mengurutkan berdasarkan jumlah saldo, nama atau nomor rekening (ada pilihan admin dan nasabah di awal program) (S0RTING)
-* Bisa menyimpan informasi Biodata pembuat rekening (termasuk password) dan melakukan pendaftaran rekening jika belum punya (STRUCT)
-* Bisa cek informasi saldo rekening (FILE HANDLING)
-* Bisa menghitung bunga tunggal jika sudah menjadi nasabah selama beberapa tahun (RECURSION)
-PEMBAGIAN TUGAS:
-* Ari: login, loginSukses
-* Aziz: bikinAkun, admin, nasabah, debugging seluruh program
-* Naufal: cek bunga, sortName, sortSaldo
-*********************************************
-TEKNIK KOMPUTER
-UNIVERSITAS INDONESIA
-*/
-
-typedef struct Akun {
+typedef struct {
     char namaDepan[LIMIT];
     char namaBelakang[LIMIT];
     char username[LIMIT];
@@ -38,21 +17,46 @@ typedef struct Akun {
     double saldo;
 } Akun;
 
-typedef struct Pin {
+typedef struct {
     char pinAdmin[SIZE];
     char pin[SIZE];
 } Pin;
 
+typedef struct {
+    char namaTjn[SIZE];
+    int jumlahTrns;
+} DataTransfer;
+
+typedef struct Node {
+    DataTransfer data;
+    struct Node *next;
+} Node;
+
+typedef struct {
+    Node *front;
+    Node *back;
+} Queue;
+
+// Fungsi user
 void admin();
 void nasabah();
+// Fungsi akun
 void bikinAkun();
 void akunBerhasilDibuat();
 void login();
 void loginSukses(double saldo, char name[]);
+// Fungsi bunga
 void bungaBank(double saldo);
 double menghitungBunga(double initial, double waktu, double bunga);
+// Fungsi Sorting
 void sortName(int size, int jumlahNasabah);
 void sortSaldo(int size, int jumlahNasabah);
+// Fungsi Transfer
+void transfer(double saldo);
+void enqueue(Queue *queue, DataTransfer item);
+DataTransfer dequeue(Queue *queue);
+void printQueue(Queue queue);
+// Fungsi lain
 int lineCount();
 void swap(Akun *first, Akun *second);
 
@@ -388,14 +392,14 @@ void loginSukses(double saldo, char name[]){
     sleep(1);
     printf("SELAMAT DATANG %s\n=========================\n", name);
     printf("PILIH MENU YANG TERSEDIA\n");
-    printf("1. CEK SALDO\n2. CEK BUNGA\n3. KEMBALI KE MENU UTAMA\nPILIHAN: ");
+    printf("1. CEK SALDO\n2. CEK BUNGA\n3. TRANSFER"
+            "\n4. KEMBALI KE MENU UTAMA\nPILIHAN: ");
     scanf("%d", &opsiUser);
     switch(opsiUser){
         case 1:
         printf("\nSaldo Anda: Rp%.2f \n", saldo);
         sleep(3);
         printf("TEKAN ENTER UNTUK KEMBALI KE MENU UTAMA ");
-
         getch();
         main();
         break;
@@ -403,6 +407,9 @@ void loginSukses(double saldo, char name[]){
         bungaBank(saldo);
         break;
         case 3:
+        sleep(1); transfer(saldo);
+        break;
+        case 4:
         sleep(1); main();
         break;
         default:
@@ -442,6 +449,7 @@ void sortName(int size, int jumlahNasabah){
     char buffer[SIZE];
     Akun data[SIZE];
     Akun temp;
+    clock_t start, end;
 
     fptr = fopen("database.txt", "r");
     if(fptr == NULL){
@@ -462,6 +470,8 @@ void sortName(int size, int jumlahNasabah){
     fclose(fptr);
 
     // swapping
+    start = clock();
+    #pragma omp parallel for shared(data, jumlahNasabah) private(i, j)
     for (i = 0; i < jumlahNasabah - 1; i++) {
         for (j = 0; j < jumlahNasabah - i - 1; j++) {
             if (strcmp(data[j].namaDepan, data[j + 1].namaDepan) > 0) {
@@ -469,8 +479,10 @@ void sortName(int size, int jumlahNasabah){
             }
         }
     }
-    
-    printf("\nNAMA YANG SUDAH DIURUTKAN:\n");
+    end = clock();
+    double duration = ((double)end - start)/CLOCKS_PER_SEC;
+
+    printf("\nNAMA YANG SUDAH DIURUTKAN (%f detik):\n", duration);
     for(i = 0; i < jumlahNasabah; i++){
         printf("%s\n",data[i].namaDepan);
 	}
@@ -497,6 +509,7 @@ void sortSaldo(int size, int jumlahNasabah){
     int i, j, max_idx;
     Akun data[SIZE];
     Akun temp;
+    clock_t start, end;
 
     fptr = fopen("database.txt", "r");
     if(fptr == NULL){
@@ -529,6 +542,8 @@ void sortSaldo(int size, int jumlahNasabah){
     }
     fclose(fptr);
 
+	start = clock();
+	#pragma omp parallel for shared(data, jumlahNasabah) private(i, j)
     for (i = 0; i < jumlahNasabah - 1; i++) {
         max_idx = i;
         for (j = i + 1; j < jumlahNasabah; j++) {
@@ -538,9 +553,11 @@ void sortSaldo(int size, int jumlahNasabah){
         }
         swap(&data[max_idx], &data[i]);
     }
+    end = clock();
+    double duration = ((double)end - start)/CLOCKS_PER_SEC;
     
     //display sorted saldo
-    printf("\nSALDO YANG SUDAH DIURUTKAN:\n");
+    printf("\nSALDO YANG SUDAH DIURUTKAN (%f detik):\n", duration);
     for(i = 0; i < jumlahNasabah; i++){
         printf("%s: %.2f\n",data[i].namaDepan, data[i].saldo);
 	}
@@ -560,6 +577,97 @@ void sortSaldo(int size, int jumlahNasabah){
 
     getch();
     main();
+}
+
+void transfer(double saldo){
+    Queue queue;
+    queue.front = NULL;
+    queue.back = NULL;
+
+    int queueLen = 0, menu = 0;
+
+    do{
+        system("CLS");
+        printf("MENU TRANSFER\n==================\n");
+        printf("1. TRANSFER\n2. LIHAT RIWAYAT TRANSFER\n3. KEMBALI KE MENU UTAMA"
+                "\nPILIHAN: ");
+        scanf("%d", &menu);
+        switch(menu){
+            case 1:
+                DataTransfer item;
+                printf("MASUKKAN NAMA TUJUAN TRANSFER: ");
+                scanf(" %[^\n]", item.namaTjn);
+                printf("MASUKKAN JUMLAH UANG YANG INGIN DITRANSFER: ");
+                scanf("%d", &item.jumlahTrns);
+                enqueue(&queue, item);
+                queueLen++;
+
+                if(queueLen > 5){
+                dequeue(&queue);
+                queueLen--;
+                }
+
+                sleep(1); printf("\nTRANSFER BERHASIL!\n");
+                sleep(2);
+                break;
+            case 2:
+                printQueue(queue);
+                printf("\n\nTEKAN ENTER UNTUK LANJUT ");
+                getch();
+                break;
+            case 3:
+                main();
+            break;
+            default:
+                printf("PILIHAN TIDAK TERSEDIA\n");
+                break;
+        }
+    } while(menu != 3);
+
+}
+
+void enqueue(Queue *queue, DataTransfer item){
+    Node *newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = item;
+    newNode->next = NULL;
+
+    if(queue->back == NULL){
+        queue->front = newNode;
+        queue->back = newNode;
+    } else{
+        queue->back->next = newNode;
+        queue->back = newNode;
+    }
+}
+
+DataTransfer dequeue(Queue *queue){
+    if(queue->front == NULL){
+        printf("Queue is empty.\n");
+        DataTransfer emptyStruct = {0, 0}; 
+        return emptyStruct;
+    }else{
+        Node *temp = queue->front;
+        DataTransfer item = temp->data;
+        queue->front = queue->front->next;
+        if (queue->front == NULL) {
+            queue->back = NULL;
+        }
+        free(temp);
+        return item;
+    }
+}
+
+void printQueue(Queue queue) {
+    if (queue.front == NULL) {
+        printf("TIDAK ADA RIWAYAT TRANSFER.\n");
+    } else {
+        Node* current = queue.front;
+        printf("RIWAYAT 5 TRANSFER TERAKHIR: \n");
+        while (current != NULL) {
+            printf("(%s, %d) \n", current->data.namaTjn, current->data.jumlahTrns);
+            current = current->next;
+        }
+    }
 }
 
 //swapping dengan call by reference
