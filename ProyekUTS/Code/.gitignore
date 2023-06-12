@@ -1,0 +1,9 @@
+*.txt
+*.exe
+
+sample.c
+test.c
+test2.c
+test3.c
+SistemAkunBank_Test.c
+tempCodeRunnerFile.c
